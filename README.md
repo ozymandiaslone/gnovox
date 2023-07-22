@@ -7,8 +7,8 @@ GnoVox is a simple combination of an LLM (I use WizardLM), text to speech (googl
 
 ---
 ## Requirements
- [Llamma.cpp Go bindings](https://github.com/go-skynet/go-llama.cpp)
- [Whisper.cpp Go bindings](https://github.com/ggerganov/whisper.cpp/tree/master/bindings/go)
- PortAudio
+- [Llamma.cpp Go bindings](https://github.com/go-skynet/go-llama.cpp)
+- [Whisper.cpp Go bindings](https://github.com/ggerganov/whisper.cpp/tree/master/bindings/go)
+- PortAudio
     Ubuntu Install:
-    `sudo apt-get install portaudio19-dev`
+    ```sudo apt-get install portaudio19-dev```
