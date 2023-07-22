@@ -83,12 +83,14 @@ func readMultiLineInput(reader *bufio.Reader) string {
 func processQueue() {
   for {
    	if len(sentenceQueue) > 0 {
+      if len(sentenceQueue) > 1 {
+        fmt.Println("We got more than one in the queeueue!!!!!!")
+      }
    		sentence := sentenceQueue[0]
-   		sentenceQueue = sentenceQueue[1:]
-      fmt.Println("Beginning speech...")
       Say(sentence)
+   		sentenceQueue = sentenceQueue[1:]
    	}
-    time.Sleep(20 * time.Millisecond)
+    time.Sleep(15 * time.Millisecond)
   }
 }
 
