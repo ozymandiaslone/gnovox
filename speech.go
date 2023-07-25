@@ -29,5 +29,5 @@ func deleteMP3() {
 
 func Say(phrase string) {
   speech.Speak(phrase)
-  go deleteMP3()
+  deleteMP3()
 }

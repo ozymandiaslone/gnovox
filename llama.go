@@ -1,11 +1,8 @@
 package main
-
 import (
   "fmt"
-  "os"
-  "bufio"
-  "io"
   "strings"
+  "os"
   "time"
   
   llama "github.com/go-skynet/go-llama.cpp"
@@ -13,14 +10,15 @@ import (
 
 var (
   threads = 8
-  tokens = 1024
+  tokens = 2224
   gpulayers = 0
   modelPath = "./models/wizardLM-7B.ggmlv3.q4_0.bin"
-  sentenceQueue []string 
+  sentenceQueue chan string
   sentenceBuilder strings.Builder
 )
 
 func init() {
+  sentenceQueue = make(chan string, 100)
   go processQueue()
 }
 
@@ -31,10 +29,9 @@ func Inference() {
     os.Exit(1)
   }
   fmt.Printf("Model loaded succesfully. \n")
-  reader := bufio.NewReader(os.Stdin)
 
   for {
-    text := readMultiLineInput(reader)
+    text := ReadMultiLineInput()
     _, err := l.Predict(text, llama.Debug, llama.SetTokenCallback(caller), llama.SetTokens(tokens), llama.SetThreads(threads), llama.SetTopK(90), llama.SetTopP(0.87))
     if err != nil {
       panic(err)
@@ -51,46 +48,24 @@ func Inference() {
 func caller(token string) bool {
   fmt.Print(token)
   sentenceBuilder.WriteString(token)
-  if strings.ContainsAny(token, ".!?") {
-    sentenceQueue = append(sentenceQueue, sentenceBuilder.String())
+  if strings.ContainsAny(token, ".!?:") {
+    sentenceQueue <- sentenceBuilder.String()
     sentenceBuilder.Reset()
   }
   return true
 }
 
-func readMultiLineInput(reader *bufio.Reader) string {
-	var lines []string
-	fmt.Print(">>> ")
-
-	for {
-		line, err := reader.ReadString('\n')
-		if err != nil {
-			if err == io.EOF {
-				os.Exit(0)
-			}
-			fmt.Printf("Reading the prompt failed: %s", err)
-			os.Exit(1)
-		}
-    lines = append(lines, line)
-    break
-	}
-
-	text := strings.Join(lines, "")
-	fmt.Println("Sending", text)
-	return text
-}
-
 func processQueue() {
   for {
-   	if len(sentenceQueue) > 0 {
-      if len(sentenceQueue) > 1 {
-        fmt.Println("We got more than one in the queeueue!!!!!!")
-      }
-   		sentence := sentenceQueue[0]
+    select {
+    case sentence := <- sentenceQueue:
+      fmt.Println("speaking Sentence!")
       Say(sentence)
-   		sentenceQueue = sentenceQueue[1:]
-   	}
-    time.Sleep(15 * time.Millisecond)
+      time.Sleep(50* time.Millisecond)
+    default:
+      time.Sleep(50* time.Millisecond)
+      continue
+    }
   }
 }
 
